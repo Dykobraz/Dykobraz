@@ -229,9 +229,15 @@ class Handler(BaseHTTPRequestHandler):
     def log_message(self, *args):
         pass  # Do not log note contents or requests.
 
-    def allowed(self):
-        return (self.headers.get('Host') in (f'127.0.0.1:{PORT}', f'localhost:{PORT}')
-                and self.headers.get('Sec-Fetch-Site', 'none') in ('same-origin', 'none'))
+    def allowed(self, navigation=False):
+        if self.headers.get('Host') not in (f'127.0.0.1:{PORT}', f'localhost:{PORT}'):
+            return False
+        if self.headers.get('Sec-Fetch-Site', 'none') in ('same-origin', 'none'):
+            return True
+        # Opening the app from an external link is safe. API and embedded
+        # cross-site requests remain restricted to the original origin.
+        return (navigation and self.headers.get('Sec-Fetch-Mode') == 'navigate'
+                and self.headers.get('Sec-Fetch-Dest') == 'document')
 
     def respond(self, code, body, content_type='application/json; charset=utf-8'):
         raw = body if isinstance(body, bytes) else json.dumps(body, ensure_ascii=False).encode()
@@ -246,7 +252,7 @@ class Handler(BaseHTTPRequestHandler):
         self.wfile.write(raw)
 
     def do_GET(self):
-        if not self.allowed():
+        if not self.allowed(navigation=self.path == '/'):
             return self.respond(403, {'error': 'Nepovolený host.'})
         if self.path == '/api/state':
             if self.headers.get('X-Session-Token') != TOKEN:

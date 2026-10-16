@@ -118,6 +118,16 @@ class HTTPTests(unittest.TestCase):
                 self.assertEqual(self.request('GET', '/api/state', headers=headers)[0], 403)
                 self.assertEqual(self.request('POST', '/api/clear', {}, headers)[0], 403)
 
+    def test_external_link_can_open_app_but_cannot_access_api(self):
+        headers = {'Sec-Fetch-Site': 'cross-site', 'Sec-Fetch-Mode': 'navigate',
+                   'Sec-Fetch-Dest': 'document'}
+        self.assertEqual(self.request('GET', '/', headers=headers)[0], 200)
+        self.assertEqual(self.request('GET', '/api/state', headers=headers)[0], 403)
+        self.assertEqual(self.request('POST', '/api/clear', {}, headers)[0], 403)
+        self.assertEqual(self.request('GET', '/', headers={'Sec-Fetch-Site': 'cross-site'})[0], 403)
+        headers['Host'] = 'attacker.example'
+        self.assertEqual(self.request('GET', '/', headers=headers)[0], 403)
+
     def test_note_to_state_to_clear_end_to_end(self):
         with patch.object(app, 'summarize', return_value='Hlavní myšlenky: zkouška'):
             status, _, body = self.request('POST', '/api/note', {'text': 'test', 'goals': 'učení'})
