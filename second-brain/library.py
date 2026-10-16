@@ -4,6 +4,11 @@ import hashlib
 from pathlib import Path
 import re
 import sqlite3
+import unicodedata
+
+STOPWORDS = set('a aby ale ani anebo az bez bude byt by byl co do i jak jake jaky jaka je jeho jej jeji '
+                'jsou k kdy kde kdo ma mam me mi moje muj na nad nase nebo nez o od po pod pro pri se '
+                'si s tak take ten toho to tu u v ve z ze the an and are for how in is of on or to what'.split())
 
 
 class Library:
@@ -114,21 +119,54 @@ class Library:
         with self.connect() as db:
             db.execute('DELETE FROM sources WHERE id=?', (source_id,))
 
-    def search(self, question, project_id=None, limit=6):
+    def search(self, question, project_id=None, limit=6, source_ids=None):
         words = list(dict.fromkeys(re.findall(r'[^\W_]+', question, re.UNICODE)))[:24]
+        def normalized(word):
+            return ''.join(c for c in unicodedata.normalize('NFKD', word.lower()) if not unicodedata.combining(c))
+        words = [word for word in words if normalized(word) not in STOPWORDS]
         if not words:
             return []
         query = ' OR '.join('"' + word + '"' for word in words)
+        ids = list(dict.fromkeys(int(value) for value in (source_ids or [])))
+        if len(ids) > 6:
+            raise ValueError('Vyber nejvýše šest zdrojů.')
+        source_filter = ' AND source_id IN (' + ','.join('?' for _ in ids) + ')' if ids else ''
         with self.connect() as db:
             rows = db.execute('''SELECT passages.id AS passage_id, source_id, title,
                 start, end, passages.text, sources.project_id FROM search_index
                 JOIN passages ON passages.id=search_index.rowid
                 JOIN sources ON sources.id=passages.source_id
                 WHERE search_index MATCH ? AND (? IS NULL OR sources.project_id=?)
-                ORDER BY bm25(search_index), passages.id LIMIT ?''',
-                (query, project_id, project_id, min(max(int(limit), 1), 20)))
+                ''' + source_filter + ' ORDER BY bm25(search_index), passages.id LIMIT ?',
+                (query, project_id, project_id, *ids, min(max(int(limit), 1), 20)))
             return [dict(row) for row in rows]
 
     def export_markdown(self, source_id):
         source = self.source(source_id)
         return f"# {source['title']}\n\n{source['body']}\n"
+
+    def evidence(self, passage_ids, project_id=None):
+        ids = list(dict.fromkeys(int(value) for value in passage_ids))
+        if not ids or len(ids) > 12:
+            return []
+        placeholders = ','.join('?' for _ in ids)
+        with self.connect() as db:
+            rows = db.execute(f'''SELECT passages.id AS passage_id, source_id, title,
+                start, end, passages.text, project_id FROM passages JOIN sources
+                ON sources.id=passages.source_id WHERE passages.id IN ({placeholders})
+                AND (? IS NULL OR project_id=?)''', (*ids, project_id, project_id))
+            found = {row['passage_id']: dict(row) for row in rows}
+        return [found[value] for value in ids if value in found]
+
+    def source_passages(self, source_ids, project_id=None, limit=12):
+        ids = list(dict.fromkeys(int(value) for value in source_ids))
+        if not ids or len(ids) > 6:
+            return []
+        placeholders = ','.join('?' for _ in ids)
+        with self.connect() as db:
+            rows = db.execute(f'''SELECT passages.id AS passage_id, source_id, title,
+                start, end, passages.text, project_id FROM passages JOIN sources
+                ON sources.id=passages.source_id WHERE source_id IN ({placeholders})
+                AND (? IS NULL OR project_id=?) ORDER BY passages.start, source_id LIMIT ?''',
+                (*ids, project_id, project_id, min(max(int(limit), 1), 12)))
+            return [dict(row) for row in rows]

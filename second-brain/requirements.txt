@@ -1,0 +1,4 @@
+google-auth-oauthlib>=1.2,<2
+google-auth>=2.29,<3
+requests>=2.32,<3
+pypdf>=5,<7
