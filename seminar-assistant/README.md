@@ -4,6 +4,8 @@
 
 Místní prototyp asistenta: systémový zvuk → pracovní rozpoznání v paměti → české poznámky a návrhy kroků. Používá ScreenCaptureKit, faster-whisper a Ollama. Žádné placené API. Zvuk ani doslovný přepis se neukládají do souborů. Poznámky jsou v paměti do ukončení aplikace; export je ruční. Zpracování probíhá po asi 15sekundových úsecích; skutečné zpoždění závisí na výkonu Macu a modelu.
 
+Příjem zvuku, rozpoznávání řeči a tvorba poznámek probíhají odděleně. Pomalá generace poznámek neblokuje rozpoznávání další řeči; čekající pracovní texty se zpracují společně, nejvýše čtyři úseky na aktualizaci. Stavový řádek ukazuje přibližné množství čekajícího zvuku a počet textových úseků. Paměťové fronty jsou omezené: při více než přibližně dvou minutách čekajícího zvuku nebo 32 čekajících textových úsecích aplikace přizná přetížení a zastaví se. Obsah se potichu nevynechává. Toto opatření nezaručuje dostatečnou rychlost na každém Macu.
+
 **Stav:** Python backend a HTTP rozhraní lze ověřit na Linuxu. Nativní zachytávač je určen pro macOS a musí se na Macu sestavit a otestovat. Celý řetězec živého zvuku zatím není ověřený. Před seminářem proveď níže uvedenou zkoušku.
 
 ## 1. Instalace na Macu
