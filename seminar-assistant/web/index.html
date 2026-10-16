@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="cs">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Seminární kolega</title><link rel="stylesheet" href="/style.css"></head>
+<body>
+<aside class="sidebar">
+  <a class="brand" href="/" aria-label="Seminární kolega, úvod"><span class="brand-icon">s<span>·</span></span><span>seminární<br><strong>kolega</strong></span></a>
+  <div class="sidebar-caption">TVŮJ PRACOVNÍ PROSTOR</div>
+  <div class="nav-current"><span>▤</span> Aktuální seminář <span class="nav-dot"></span></div>
+  <div class="context">
+    <label for="goals">S čím dnes pomoct?</label>
+    <p>Dej kolegovi trochu kontextu.</p>
+    <textarea id="goals" rows="6" maxlength="4000" placeholder="Co se chceš naučit? Na jakém projektu pracuješ? Co potřebuješ rozhodnout?"></textarea>
+    <span class="context-hint">Použije se při spuštění a doplnění poznámky.</span>
+  </div>
+  <div class="sidebar-bottom"><span class="privacy-dot"></span><div>Jen na tvém Macu<span>Bez cloudového AI</span></div></div>
+</aside>
+<div class="workspace">
+  <header class="topbar"><div><span class="breadcrumb">Pracovní prostor</span><span class="slash">/</span><span>Aktuální seminář</span></div><button id="settings" class="icon-button" aria-label="Otevřít nastavení"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="3" fill="currentColor"/><circle cx="16" cy="17" r="3" fill="currentColor"/></svg></button></header>
+  <main>
+    <div class="page-heading"><div><div class="eyebrow">PROSTOR PRO SOUVISLOSTI</div><h1>Ty se soustřeď.<br><span>Kolega dělá poznámky.</span></h1><p>Myšlenky ze semináře. Jasnější další krok.</p></div><button id="export" class="button secondary">↓ <span>Exportovat poznámky</span></button></div>
+    <section class="session-bar" aria-label="Ovládání poslechu"><div class="session-indicator" id="session-indicator"><span></span><div><strong id="session-label">Připraveno na seminář</strong><p id="status" role="status">Až budeš připravený, spusť poslech.</p></div></div><div class="session-controls"><div class="audio-meter"><label for="level">Zvuk</label><meter id="level" min="0" max="0.15" value="0"></meter></div><button id="stop" class="button secondary" hidden>■ Zastavit</button><button id="start" class="button primary"><svg width="11" height="11" viewBox="0 0 12 12" fill="currentColor"><path d="M3 1.5 10 6 3 10.5Z"/></svg> Spustit poslech</button></div></section>
+    <div class="content-grid">
+      <section class="notebook"><div class="panel-heading"><h2>Poznámky ze semináře</h2><span class="small-label" id="update-count">Zatím bez poznámek</span></div><div id="notes" class="note-content"><div class="empty-state"><div class="paper-icon">≋</div><h3>Všechno důležité má své místo.</h3><p>Spusť poslech a tady začnou přibývat hlavní myšlenky, vysvětlení a otevřené otázky.</p><span>Nebo začni vlastní poznámkou dole ↓</span></div></div><div class="composer"><label for="input">Přidej vlastní myšlenku</label><textarea id="input" rows="2" maxlength="16000" placeholder="Souvislost, otázka nebo něco, co nechceš zapomenout…"></textarea><div class="composer-bottom"><span>⌘ + Enter pro zpracování</span><button id="add" class="button small">Přidat poznámku <span>↑</span></button></div></div></section>
+      <aside class="insights"><div class="panel-heading"><h2>Co dál?</h2><span class="spark">✳</span></div><p class="insights-intro">Od myšlenek ke konkrétním krokům.</p><div id="next-steps"><div class="insight-placeholder"><span>01</span><div><h3>Možnosti a doporučení</h3><p>Jak využít to, co právě zaznělo.</p></div></div><div class="insight-placeholder"><span>02</span><div><h3>Navržené úkoly</h3><p>Malé kroky pro tvůj projekt.</p></div></div><div class="insight-placeholder"><span>03</span><div><h3>Otázky na příště</h3><p>Co si ještě vyjasnit nebo ověřit.</p></div></div></div><div class="insights-footer">Návrhy kolegy jsou podněty.<br>Rozhodnutí zůstává na tobě.</div></aside>
+    </div>
+    <footer class="page-footer"><span><span class="privacy-dot"></span> Zvuk a pracovní přepis se neukládají do souborů.</span><button id="clear" class="text-button">Vymazat relaci</button></footer>
+  </main>
+</div>
+<dialog id="settings-dialog"><div class="dialog-heading"><h2>Nastavení a soukromí</h2><button id="close-settings" class="icon-button" aria-label="Zavřít nastavení">×</button></div><h3>Co kolega slyší</h3><p>Zachytává systémový zvuk včetně ostatních aplikací a oznámení. Mikrofon není zahrnutý. Před seminářem zavři ostatní přehrávání a zapni Nerušit.</p><h3>Kde jsou poznámky</h3><p>Zpracování probíhá na tomto Macu. Zvuk a pracovní přepis se nezapisují do souborů. Poznámky zůstávají v paměti do vymazání nebo ukončení aplikace; soubor vznikne až při exportu.</p><h3>Jak ukončit poslech</h3><p>Použij Zastavit, nebo v Terminálu Ctrl+C. Zavření této stránky poslech nezastaví. Rozpracovaný úsek se při zastavení zahodí.</p><p class="dialog-footnote">Poznámky jsou zhuštěné a mohou obsahovat chyby. První stažení modelů potřebuje internet; rychlost zpracování závisí na výkonu Macu.</p></dialog>
+<script src="/app.js"></script>
+</body></html>
