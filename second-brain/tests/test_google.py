@@ -5,7 +5,7 @@ import stat
 import sys
 import tempfile
 import unittest
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from google_readonly import GoogleReadOnly, SCOPES, mail_text
@@ -73,6 +73,20 @@ class GoogleTests(unittest.TestCase):
         self.google.disconnect()
         self.assertFalse(self.google.token_path.exists())
         self.assertGreater(self.google.generation, generation)
+
+    def test_authorized_get_uses_google_service_hosts_and_saves_refreshed_token(self):
+        self.google.token_path.write_text('{}')
+        credentials = Mock()
+        credentials.to_json.return_value = '{}'
+        with patch('google.oauth2.credentials.Credentials.from_authorized_user_file', return_value=credentials), \
+                patch('google.auth.transport.requests.AuthorizedSession') as authorized:
+            session = authorized.return_value.__enter__.return_value
+            session.get.return_value.json.return_value = {'ok': True}
+            self.assertEqual(self.google._get('gmail/v1/users/me/messages'), {'ok': True})
+            self.assertEqual(session.get.call_args.args[0], 'https://gmail.googleapis.com/gmail/v1/users/me/messages')
+            self.google._get('calendar/v3/calendars/primary/events')
+            self.assertEqual(session.get.call_args.args[0], 'https://www.googleapis.com/calendar/v3/calendars/primary/events')
+        self.assertEqual(stat.S_IMODE(self.google.token_path.stat().st_mode), 0o600)
 
 
 if __name__ == '__main__':
